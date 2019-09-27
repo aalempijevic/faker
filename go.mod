@@ -1,3 +1,3 @@
-module github.com/bxcodec/faker/v3
+module github.com/aalempijevic/faker
 
 go 1.12
