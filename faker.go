@@ -322,7 +322,7 @@ func AddProvider(tag string, provider TaggedFunction) error {
 func getValue(a interface{}) (reflect.Value, error) {
 	t := reflect.TypeOf(a)
 	if t == nil {
-		log.Fmt("Returning empty value for interface{} type")
+		fmt.Println("Returning empty value for interface{} type")
 		return reflect.Value{}, nil
 	}
 	k := t.Kind()
