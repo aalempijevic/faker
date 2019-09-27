@@ -322,7 +322,8 @@ func AddProvider(tag string, provider TaggedFunction) error {
 func getValue(a interface{}) (reflect.Value, error) {
 	t := reflect.TypeOf(a)
 	if t == nil {
-		return reflect.Value{}, fmt.Errorf("interface{} not allowed")
+		log.Fmt("Returning empty value for interface{} type")
+		return reflect.Value{}, nil
 	}
 	k := t.Kind()
 
