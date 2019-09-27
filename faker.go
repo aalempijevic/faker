@@ -203,6 +203,7 @@ var (
 	ErrWrongFormattedTag       = "Tag \"%s\" is not written properly"
 	ErrUnknownType             = "Unknown Type"
 	ErrNotSupportedTypeForTag  = "Type is not supported by tag."
+	Skip                       = errors.New("Skipping empty types")
 )
 
 func init() {
@@ -322,8 +323,7 @@ func AddProvider(tag string, provider TaggedFunction) error {
 func getValue(a interface{}) (reflect.Value, error) {
 	t := reflect.TypeOf(a)
 	if t == nil {
-		fmt.Println("Returning empty value for interface{} type")
-		return reflect.Value{}, nil
+		return reflect.Value{}, Skip // if its empty type then we'll skip over it and generate as much as we can
 	}
 	k := t.Kind()
 
@@ -361,11 +361,17 @@ func getValue(a interface{}) (reflect.Value, error) {
 				switch {
 				case tags.keepOriginal:
 					zero, err := isZero(reflect.ValueOf(a).Field(i))
+					if err == Skip {
+						continue
+					}
 					if err != nil {
 						return reflect.Value{}, err
 					}
 					if zero {
 						err := setDataWithTag(v.Field(i).Addr(), tags.fieldType)
+						if err == Skip {
+							continue
+						}
 						if err != nil {
 							return reflect.Value{}, err
 						}
@@ -374,6 +380,9 @@ func getValue(a interface{}) (reflect.Value, error) {
 					v.Field(i).Set(reflect.ValueOf(a).Field(i))
 				case tags.fieldType == "":
 					val, err := getValue(v.Field(i).Interface())
+					if err == Skip {
+						continue
+					}
 					if err != nil {
 						return reflect.Value{}, err
 					}
@@ -386,6 +395,9 @@ func getValue(a interface{}) (reflect.Value, error) {
 					}
 				default:
 					err := setDataWithTag(v.Field(i).Addr(), tags.fieldType)
+					if err == Skip {
+						continue
+					}
 					if err != nil {
 						return reflect.Value{}, err
 					}
